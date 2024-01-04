@@ -1,0 +1,36 @@
+1. Create a new S3 Bucket in Frankfurt
+
+aws s3api create-bucket --bucket <bucket_name> --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1
+
+2. Create folders 
+
+temp-dir/
+scripts/
+
+echo -n "" | aws s3 cp - s3://<bucket_name>/temp-dir/
+echo -n "" | aws s3 cp - s3://<bucket_name>/scripts/
+echo -n "" | aws s3 cp - s3://<bucket_name>/data/customers_database/customers_csv/dataload=20221119/
+
+3. Upload .csv file
+
+aws s3 cp customer.csv s3://<bucket_name>/data/customers_database/customers_csv/dataload=20221119/customer.csv
+
+4. Go to Glue, Create database
+Data Catalog->Databases
+
+5. Add tables using crawler
+Name: crawler_customer_csv
+Add data source: s3://<bucket_name>/data/customers_database/customers_csv/
+
+Crawl All Subfolders
+Add role
+Target Database
+Schedule: On Demand
+Output: customers_database
+
+Run crawler
+
+Go to tables, check if table is added
+
+6. Go to athena
+Create folder athena_results on S3
