@@ -1,0 +1,19 @@
+--ec2
+
+aws ec2 run-instances \
+--image-id ami-XXX \
+--instance-type t3.micro \
+--subnet-id subnet-XXX \
+--security-group-ids sg-XXX \
+--key-name key-XXX
+
+--s3 bucket
+aws s3api create-bucket --bucket <bucket_name> --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1
+aws s3 ls
+
+--aws rekognition
+aws rekognition detect-labels --image '{"S3Object":{"Bucket":"<bucket_name>","Name":"<file_name>"}}' --region <your-region>
+
+--delete iam policy
+aws iam delete-policy --policy-arn <policy_arn>
+
