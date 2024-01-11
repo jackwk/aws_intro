@@ -7,9 +7,17 @@ aws ec2 run-instances \
 --security-group-ids sg-XXX \
 --key-name key-XXX
 
---s3 bucket
+aws ec2 describe-instances
+
+aws ec2 start-instances --instance-ids <instance_id>
+
+aws ec2 terminate-instances --instance-ids <instance_id>
+
+--s3 
 aws s3api create-bucket --bucket <bucket_name> --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1
 aws s3 ls
+
+aws s3 cp your-local-file.txt s3://your-bucket-name/path/
 
 --aws rekognition
 aws rekognition detect-labels --image '{"S3Object":{"Bucket":"<bucket_name>","Name":"<file_name>"}}' --region <your-region>
