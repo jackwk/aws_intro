@@ -25,3 +25,11 @@ aws rekognition detect-labels --image '{"S3Object":{"Bucket":"<bucket_name>","Na
 --delete iam policy
 aws iam delete-policy --policy-arn <policy_arn>
 
+--delete ALL customer managed policies (will fail if attached)
+# List policies and extract their ARNs
+POLICY_ARNS=$(aws iam list-policies --scope Local --query 'Policies[].[Arn]' --output text)
+
+# Loop through each ARN and delete the policy
+for ARN in $POLICY_ARNS; do
+    aws iam delete-policy --policy-arn "$ARN"
+done
