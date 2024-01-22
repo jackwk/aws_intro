@@ -1,0 +1,42 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "ec2:RunInstances",
+            "Resource": [
+                "arn:aws:ec2:eu-central-1:*:instance/*",
+                "arn:aws:ec2:eu-central-1:*:volume/*",
+                "arn:aws:ec2:eu-central-1:*:key-pair/*",
+                "arn:aws:ec2:eu-central-1:*:security-group/*",
+                "arn:aws:ec2:eu-central-1:*:subnet/*",
+                "arn:aws:ec2:eu-central-1:*:network-interface/*",
+                "arn:aws:ec2:eu-central-1:*:placement-group/*",
+                "arn:aws:ec2:eu-central-1:*:elastic-gpu/*",
+                "arn:aws:ec2:eu-central-1:*:elastic-inference-accelerator/*",
+                "arn:aws:ec2:eu-central-1:*:capacity-reservation/*",
+                "arn:aws:ec2:eu-central-1:*:launch-template/*",
+                "arn:aws:ec2:eu-central-1:*:dedicated-host/*",
+                "arn:aws:ec2:eu-central-1:*:snapshot/*",
+                "arn:aws:ec2:eu-central-1:*:volume/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ec2:InstanceType": "t2.micro"
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ec2:TerminateInstances",
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ec2:*",
+            "NotResource": [
+                "arn:aws:ec2:eu-central-1:*:instance/*"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+1. Make folder
+mkdir lambda_project
+cd lambda_project
+vi os_lambda.py
+
+
+2. install dependencies locally
+
+sudo yum install python3-pip
+
+pip install requests boto3 -t /home/ec2-user/lambda_project
+
+3. prepare the deployment package
+
+cd lambda_project
+zip -r ../lambda_function.zip .
+
+zip i plik python muszą się nazywać tak samo
+
+4. (Optional) install aws cli and push to s3
+
+5. Zwiększyć timeout na lambdzie
+
+6. Dodać permissiony
