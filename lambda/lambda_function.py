@@ -1,7 +1,11 @@
+import os
 import json
 import requests
 import boto3
 from datetime import datetime
+
+# Environment variable
+bucket_name = os.environ['BUCKET_NAME']
 
 def lambda_handler(event, context):
     # Define the geographical bounds of Poland
@@ -23,7 +27,7 @@ def lambda_handler(event, context):
 
     # Save to S3
     s3 = boto3.client('s3')
-    bucket_name = 'your-s3-bucket-name'  # replace with your bucket name
+    bucket_name = 'labmda-bucket-12355124'  # replace with your bucket name
     key = f"flights-{datetime.now().isoformat()}.json"
     s3.put_object(Bucket=bucket_name, Key=key, Body=json.dumps(data))
 
