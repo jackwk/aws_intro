@@ -1,0 +1,55 @@
+
+Designing two data flows using AWS services for data ingestion, processing, and storage is a great way to demonstrate the versatility of AWS in handling different types of data workflows. Let's outline the design for both data flows using flight data from an open API as an example.
+
+Data Flow 1: API Gateway, Lambda, S3, and RDS/DynamoDB
+Objective: Ingest flight data through API Gateway, process it with Lambda, store it in S3 as flat files, and then load it into RDS or DynamoDB.
+
+Steps:
+API Gateway Setup:
+
+Create a REST API in API Gateway.
+Define resources and methods to receive flight data.
+Configure method request and response, including necessary query parameters.
+Lambda Function for Data Processing:
+
+Create a Lambda function triggered by API Gateway.
+Write code to process incoming data (e.g., parsing, validation).
+Configure necessary IAM roles for Lambda to access S3 and database services.
+Storing Data in S3:
+
+From the Lambda function, save the processed data as flat files (e.g., CSV, JSON) in an S3 bucket.
+Implement proper S3 bucket policies and permissions for security.
+Loading Data into RDS or DynamoDB:
+
+For RDS: Write a script or use AWS Data Pipeline to import data from S3 into the RDS instance.
+For DynamoDB: Use AWS Lambda or DynamoDB import tools to load data from S3.
+Error Handling and Logging:
+
+Implement error handling in the Lambda function.
+Use Amazon CloudWatch for logging and monitoring the process.
+Data Flow 2: Kinesis, Glue, and S3/RDS/DynamoDB
+Objective: Stream flight data using Kinesis, process and transform it with Glue, and store it in S3, RDS, or DynamoDB.
+
+Steps:
+Kinesis Data Stream Setup:
+
+Create a Kinesis Data Stream to receive flight data.
+Configure producers to send data to the Kinesis stream (this could be simulated for the course).
+AWS Glue for Data Processing and Transformation:
+
+Set up an AWS Glue job to consume data from the Kinesis stream.
+Perform necessary ETL operations (e.g., data cleansing, transformation).
+Glue can directly interact with Kinesis to pull data streams.
+Storing Processed Data:
+
+Configure Glue to store the transformed data in S3, RDS, or DynamoDB.
+For S3: Save as flat files or in a format optimized for analytics (e.g., Parquet).
+For RDS/DynamoDB: Use Glue's capability to write directly to these databases.
+Monitoring and Optimization:
+
+Utilize AWS CloudWatch for monitoring the Kinesis and Glue jobs.
+Optimize the data flow for performance and cost (e.g., Kinesis shard scaling, Glue job resource allocation).
+Security and Access Control:
+
+Ensure proper IAM roles and policies are in place for Glue and Kinesis.
+Secure data transfer and storage using AWS security best practices.
