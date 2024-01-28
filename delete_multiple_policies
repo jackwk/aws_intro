@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# List of policy ARNs to delete
+declare -a policy_arns=(
+"arn:aws:iam::XXXXXXXXXXXX:policy/policy-arn"
+#add more policies
+)
+
+# Loop through each policy ARN and delete
+for arn in "${policy_arns[@]}"
+do
+    echo "Deleting policy: $arn"
+    aws iam delete-policy --policy-arn "$arn"
+done
