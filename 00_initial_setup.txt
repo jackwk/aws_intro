@@ -1,0 +1,2 @@
+1. EC2 with basic tools
+2. Prog user to access EC2
