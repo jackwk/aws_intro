@@ -1,0 +1,3 @@
+1. Create a new bucket (with versioning on eu-central-1) called my-bucket-for-lambda-files
+2. Create a new role for Lambda function and give it write access to bucket from step 1
+3. Create a Lambda function and give it role from step 2, call it OpenSkyLambda, increase timeout to 15 seconds and create a variable called BUCKET_NAME and assign bucket from step 1

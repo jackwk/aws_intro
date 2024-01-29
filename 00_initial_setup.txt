@@ -1,2 +1,36 @@
-1. EC2 with basic tools
-2. Prog user to access EC2
+Prep work: 
+0. Policy for user to stop/start EC2
+1. Prog user (stop/start EC2 only)
+2. EC2 with basic tools (aws cli, terraform, python)
+3. Role for EC2 
+4. Create S3 for Lambda
+
+Prepare Lambda
+0. On EC2 save a file as lambda_function.py
+1. Create a new directory for Lambda package
+
+mkdir lambda_project
+cd lambda_project
+
+2. Navigate to folder and start venv
+
+python3 -m venv venv
+source venv/bin/activate  
+
+3. Install dependencies
+
+pip install requests
+
+4. Add lambda to that folder (compy lambda_function.zip)
+
+5. Find dependencies and zip them:
+
+cd venv/lib/pythonX.Y/site-packages/  # Adjust path for your Python version
+zip -r9 ${OLDPWD}/function.zip .
+cd $OLDPWD  # Go back to your project directory
+zip -g function.zip lambda_function.py
+
+6. Upload to S3
+
+aws s3 cp function.zip s3://lambda-code-bucket-for-tests
+
