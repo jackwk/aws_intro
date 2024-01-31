@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "lambda_bucket" {
-  bucket = "my-bucket-for-lambda-files"
+  bucket = "opensky-flights-json-bucket"
 }
 
 resource "aws_s3_bucket_versioning" "lambda_bucket_versioning" {
@@ -30,8 +30,9 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-resource "aws_iam_policy" "lambda_s3_policy" {
-  name = "lambda_s3_policy"
+resource "aws_iam_role_policy" "lambda_policy" {
+  name   = "lambda_policy"
+  role   = aws_iam_role.lambda_role.id
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -45,19 +46,22 @@ resource "aws_iam_policy" "lambda_s3_policy" {
           "${aws_s3_bucket.lambda_bucket.arn}/*"
         ],
       },
+      {
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Effect = "Allow",
+        Resource = "arn:aws:logs:*:*:*"
+      },
     ],
   })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_s3_attachment" {
-  role       = aws_iam_role.lambda_role.name
-  policy_arn = aws_iam_policy.lambda_s3_policy.arn
 }
 
 resource "aws_lambda_function" "opensky_lambda" {
   function_name = "OpenSkyLambda"
 
-  // Replace with the appropriate runtime and handler
   runtime = "python3.12"
   handler = "lambda_function.lambda_handler"
 
@@ -75,3 +79,24 @@ resource "aws_lambda_function" "opensky_lambda" {
     }
   }
 }
+
+resource "aws_cloudwatch_event_rule" "lambda_every_5_minutes" {
+  name                = "every-5-minutes"
+  description         = "Trigger every 5 minutes"
+  schedule_expression = "rate(5 minutes)"
+}
+
+resource "aws_cloudwatch_event_target" "trigger_lambda" {
+  rule      = aws_cloudwatch_event_rule.lambda_every_5_minutes.name
+  target_id = "OpenSkyLambdaTarget"
+  arn       = aws_lambda_function.opensky_lambda.arn
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.opensky_lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_every_5_minutes.arn
+}
+

@@ -34,3 +34,8 @@ zip -g function.zip lambda_function.py
 
 aws s3 cp function.zip s3://lambda-code-bucket-for-tests
 
+***
+Possible improvements
+-move dependencies to Lambda layers
+-find a way to automate Lambda test
+-Eventbridge Schedule not really supported by terraform
