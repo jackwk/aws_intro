@@ -1,1 +1,0 @@
-aws glue start-job-run --job-name "your-glue-job-name" --arguments='--database=yourDatabaseName,--table_name=yourTableName'

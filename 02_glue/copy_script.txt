@@ -1,0 +1,1 @@
+aws s3 cp ~/aws_intro/02_glue/glue-script.py s3://lambda-code-bucket-for-tests/
