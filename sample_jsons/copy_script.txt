@@ -1,0 +1,1 @@
+aws s3 cp ~/aws_intro/sample_jsons/test_big2.json s3://lambda-code-bucket-for-tests/jsons/
