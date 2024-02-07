@@ -39,7 +39,8 @@ df_exploded = df.select(explode(col("states")).alias("state"))
 df_flattened = df_exploded.select(
     col("state").getItem(0).alias("icao24"),
     col("state").getItem(1).alias("callsign"),
-    col("state").getItem(2).alias("time_position")
+    col("state").getItem(2).alias("origin_country"),
+    col("state").getItem(3).alias("time_position")
 )
 
 # Debug: Print out the schema to confirm the structure
@@ -58,6 +59,7 @@ for row in df_flattened.collect():
     # Assuming df_flattened already only contains the relevant "states" data as before
     icao24_value = row.icao24.string if row.icao24.string is not None else row.icao24.int
     callsign_value = row.callsign.string if row.callsign.string is not None else row.callsign.int
+    origin_country_value = row.origin_country.string if row.origin_country.string is not None else row.origin_country.int
     time_position_value = row.time_position.int if row.time_position.int is not None else row.time_position.string
 
     # Convert time_position_value to int, ensuring it matches DynamoDB's expected format
@@ -67,6 +69,7 @@ for row in df_flattened.collect():
     item = {
         'icao24': icao24_value,
         'callsign': callsign_value,
+        'origin_country': origin_country_value,
         'time_position': time_position_value
     }
 
