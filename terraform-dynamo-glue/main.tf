@@ -99,7 +99,7 @@ resource "aws_glue_job" "example_glue_job" {
     python_version  = "3" # Make sure this matches the version used in your script
   }
 
-  glue_version = "2.0" # Or the appropriate version
+  glue_version = "4.0" # Or the appropriate version
   max_capacity = 2.0   # Adjust this based on your job's needs
 
   default_arguments = {

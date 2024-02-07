@@ -4,12 +4,6 @@ from awsglue.context import GlueContext
 from awsglue.dynamicframe import DynamicFrame
 from pyspark.sql.functions import explode, col
 
-#This one works with following JSON
-#{"time": 1706735499, "states": [
-#    ["SWCCAA", 1707122543]
-#    ]
-#}
-
 sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
@@ -57,6 +51,20 @@ for row in df_flattened.collect():
 
     # Convert time_position_value to int, ensuring it matches DynamoDB's expected format
     time_position_value = int(time_position_value)
+
+    # Prepare item for DynamoDB insertion
+    item = {
+        'icao24': icao24_value,
+        'time_position': time_position_value
+    }
+
+    # Attempt to insert the item into DynamoDB
+    try:
+        table.put_item(Item=item)
+        print(f"Successfully inserted: {item}")
+    except Exception as e:
+        print(f"Error inserting item into DynamoDB: {e}")
+
 
     # Prepare item for DynamoDB insertion
     item = {
