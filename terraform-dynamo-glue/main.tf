@@ -74,7 +74,6 @@ resource "aws_iam_policy" "glue_s3_dynamodb_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents",
           "logs:DescribeLogStreams"
-          // Include additional CloudWatch Logs permissions as necessary
         ],
         Effect = "Allow",
         Resource = "arn:aws:logs:*:*:*"

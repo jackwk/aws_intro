@@ -1,0 +1,5 @@
+aws glue start-job-run --job-name "example-glue-job"
+
+aws s3 cp ~/aws_intro/sample_jsons/2_1.json s3://lambda-code-bucket-for-tests/jsons/
+
+aws s3 cp ~/aws_intro/02_glue/glue-script.py s3://lambda-code-bucket-for-tests/
