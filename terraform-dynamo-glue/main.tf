@@ -89,7 +89,7 @@ resource "aws_iam_role_policy_attachment" "glue_s3_dynamodb_attach" {
 }
 
 resource "aws_glue_job" "example_glue_job" {
-  name     = "example-glue-job"
+  name     = "opensky-glue-job"
   role_arn = aws_iam_role.glue_job_role.arn
 
   command {
