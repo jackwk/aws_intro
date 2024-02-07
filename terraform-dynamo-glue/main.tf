@@ -1,6 +1,15 @@
+#initial configuration
+
 provider "aws" {
   region = "eu-central-1"
 }
+
+variable "s3_bucket_url" {
+  description = "The URL of the S3 bucket used by the Glue job"
+  default     = "s3://lambda-code-bucket-for-tests/"
+}
+
+#DynamoDB
 
 resource "aws_dynamodb_table" "opensky_data" {
   name           = "OpenSkyData"
@@ -23,6 +32,8 @@ resource "aws_dynamodb_table" "opensky_data" {
   }
 }
 
+#IAM Stuff
+
 resource "aws_iam_role" "glue_job_role" {
   name = "glue-job-role"
 
@@ -39,7 +50,7 @@ resource "aws_iam_role" "glue_job_role" {
     ],
   })
 }
-#add cloudwatch
+
 resource "aws_iam_policy" "glue_s3_dynamodb_policy" {
   name        = "glue_s3_dynamodb_policy"
   description = "Policy for Glue Job to access S3, DynamoDB, and full CloudWatch Logs permissions"
@@ -88,23 +99,42 @@ resource "aws_iam_role_policy_attachment" "glue_s3_dynamodb_attach" {
   policy_arn = aws_iam_policy.glue_s3_dynamodb_policy.arn
 }
 
+#CloudWatch stuff
+resource "aws_cloudwatch_log_group" "glue_jobs_output" {
+  name = "/aws-glue/jobs/output"
+}
+
+resource "aws_cloudwatch_log_group" "glue_jobs_logs_v2" {
+  name = "/aws-glue/jobs/logs-v2"
+}
+
+resource "aws_cloudwatch_log_group" "glue_jobs_error" {
+  name = "/aws-glue/jobs/error"
+}
+
+resource "aws_cloudwatch_log_group" "glue_jobs" {
+  name = "/aws-glue/jobs"
+}
+
+#Glue job
+
 resource "aws_glue_job" "example_glue_job" {
   name     = "opensky-glue-job"
   role_arn = aws_iam_role.glue_job_role.arn
 
   command {
-    script_location = "s3://lambda-code-bucket-for-tests/glue-script.py"
+    script_location = "${var.s3_bucket_url}glue-script.py"
     name            = "glueetl"
-    python_version  = "3" # Make sure this matches the version used in your script
+    python_version  = "3" 
   }
 
-  glue_version = "4.0" # Or the appropriate version
-  max_capacity = 2.0   # Adjust this based on your job's needs
+  glue_version = "4.0" 
+  max_capacity = 2.0   
 
   default_arguments = {
-    "--TempDir" = "s3://lambda-code-bucket-for-tests/temp-dir"
+    "--TempDir" = "${var.s3_bucket_url}temp-dir"
   }
 
   max_retries = 0
-  timeout     = 60 # Set this according to how long your job might need to run
+  timeout     = 60 
 }
