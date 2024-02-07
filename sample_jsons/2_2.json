@@ -1,9 +1,4 @@
-{
-	"icao24": "SWR5BW",
-	"time_position": 1707122549
-}
-
-{"states": [
-    ["SWCCAA", 1707122543]
+{"time": 1706735499, "states": [
+    ["4b180b", "SWCCAA", 1707122543]
     ]
 }
