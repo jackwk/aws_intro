@@ -37,7 +37,13 @@ df_flattened = df_exploded.select(
     col("state").getItem(8).alias("on_ground"),
     col("state").getItem(9).alias("velocity"),
     col("state").getItem(10).alias("true_track"),
-    col("state").getItem(11).alias("vertical_rate")
+    col("state").getItem(11).alias("vertical_rate"),
+    col("state").getItem(12).alias("sensors"),
+    col("state").getItem(13).alias("geo_altitude"),
+    col("state").getItem(14).alias("squawk"),
+    col("state").getItem(15).alias("spi"),
+    col("state").getItem(16).alias("position_source"),
+    col("state").getItem(17).alias("category")
 )
 
 # Debug: Print out the schema to confirm the structure
@@ -76,6 +82,12 @@ for row in df_flattened.collect():
     velocity_value = get_value(row.velocity)
     true_track_value = get_value(row.true_track)
     vertical_rate_value = get_value(row.vertical_rate)
+    sensors_value = get_value(row.sensors_value)
+    geo_altitude_value = get_value(row.sgeo_altitude_value)
+    squawk_value = get_value(row.squawk_value)
+    spi_value = get_value(row.spi_value)
+    position_source_value = get_value(row.position_source_value)
+    category_value = get_value(row.category_value)
 
     # Convert numeric fields to appropriate types, handling None values
     if time_position_value is not None:
@@ -94,6 +106,10 @@ for row in df_flattened.collect():
         true_track_value = Decimal(str(true_track_value))
     if vertical_rate_value is not None:
         vertical_rate_value = Decimal(str(vertical_rate_value))
+    if on_ground_value is not None: #not sure if bool works on dynamo
+        on_ground_value = bool(on_ground_value)
+    if sensors_value is not None:
+        sensors_value = Decimal(str(sensors_value))
 
     # Prepare item for DynamoDB insertion
     item = {
@@ -108,7 +124,13 @@ for row in df_flattened.collect():
         'on_ground': on_ground_value,
         'velocity': velocity_value,
         'true_track': true_track_value,
-        'vertical_rate': vertical_rate_value
+        'vertical_rate': vertical_rate_value,
+        'sensors': sensors_value,
+        'geo_altitude': geo_altitude_value,
+        'squawk': squawk_value,
+        'spi': spi_value,
+        'position_source': position_source_value,
+        'category': category_value
     }
 
     # Insert item into DynamoDB (wrapped in try-except for safety)
