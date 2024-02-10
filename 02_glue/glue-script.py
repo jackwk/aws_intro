@@ -10,13 +10,13 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 
 # Specify your S3 bucket and prefix
-s3_bucket = 'lambda-code-bucket-for-tests'
-s3_prefix = 'jsons/'  # e.g., 'json-files/'
+s3_bucket = 'opensky-flights-json-bucket'
+
 
 # Read data from S3
 datasource0 = glueContext.create_dynamic_frame.from_options(
     's3',
-    {'paths': [f's3://{s3_bucket}/{s3_prefix}']},
+    {'paths': [f's3://{s3_bucket}']},
     'json'
 )
 

@@ -1,3 +1,9 @@
 terraform-dynamo-glue/.terraform/
 terraform-dynamo-glue/.terraform*
 terraform-dynamo-glue/terraform*
+terraform-lambda/.terraform/
+terraform-lambda/.terraform*
+terraform-lambda/terraform*
+tf-merged/.terraform/
+tf-merged/.terraform*
+tf-merged/terraform*
