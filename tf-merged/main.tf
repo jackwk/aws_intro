@@ -1,11 +1,33 @@
-#initial configuration
-
 provider "aws" {
   region = "eu-central-1"
 }
 
+variable "s3_json_bucket" {
+  description = "The name of the S3 bucket for storing JSON files"
+  type        = string
+  default     = "opensky-flights-json-bucket"
+}
+
+variable "s3_code_bucket" {
+  description = "The S3 bucket where the Lambda function code is stored"
+  type        = string
+  default     = "lambda-code-bucket-for-tests"
+}
+
+variable "s3_bucket_url" {
+  description = "The URL of the S3 bucket used by the Glue job"
+  default     = "s3://lambda-code-bucket-for-tests/"
+}
+
+variable "lambda_code_s3_key" {
+  description = "The S3 key (file name) of the Lambda function code"
+  type        = string
+  default     = "function.zip"
+}
+
+# S3 Bucket for JSON files
 resource "aws_s3_bucket" "lambda_bucket" {
-  bucket = "opensky-flights-json-bucket"
+  bucket = var.s3_json_bucket
 }
 
 resource "aws_s3_bucket_versioning" "lambda_bucket_versioning" {
@@ -15,6 +37,7 @@ resource "aws_s3_bucket_versioning" "lambda_bucket_versioning" {
   }
 }
 
+# IAM Role for Lambda
 resource "aws_iam_role" "lambda_role" {
   name = "lambda_execution_role"
 
@@ -61,6 +84,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
   })
 }
 
+# Lambda Function
 resource "aws_lambda_function" "opensky_lambda" {
   function_name = "OpenSkyLambda"
 
@@ -69,9 +93,8 @@ resource "aws_lambda_function" "opensky_lambda" {
 
   role = aws_iam_role.lambda_role.arn
 
-  // Replace with the actual path to your Lambda deployment package
-  s3_bucket        = "lambda-code-bucket-for-tests"
-  s3_key           = "function.zip"
+  s3_bucket = var.s3_code_bucket
+  s3_key    = var.lambda_code_s3_key
 
   timeout = 15
 
@@ -82,6 +105,7 @@ resource "aws_lambda_function" "opensky_lambda" {
   }
 }
 
+# CloudWatch Event Rule + EventBridge
 resource "aws_cloudwatch_event_rule" "lambda_every_5_minutes" {
   name                = "every-5-minutes"
   description         = "Trigger every 5 minutes"
@@ -171,7 +195,7 @@ resource "aws_iam_policy" "glue_s3_dynamodb_policy" {
           "arn:aws:s3:::lambda-code-bucket-for-tests/*",
           "arn:aws:s3:::lambda-code-bucket-for-tests",
           "arn:aws:s3:::opensky-flights-json-bucket/*",
-		  "arn:aws:s3:::opensky-flights-json-bucket"
+				  "arn:aws:s3:::opensky-flights-json-bucket"
         ]
       },
       {
@@ -187,6 +211,7 @@ resource "aws_iam_policy" "glue_s3_dynamodb_policy" {
     ]
   })
 }
+
 
 resource "aws_iam_role_policy_attachment" "glue_s3_dynamodb_attach" {
   role       = aws_iam_role.glue_job_role.name
