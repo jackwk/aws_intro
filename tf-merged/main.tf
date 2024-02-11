@@ -1,3 +1,5 @@
+#initial configuration
+
 provider "aws" {
   region = "eu-central-1"
 }
@@ -100,13 +102,6 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
   source_arn    = aws_cloudwatch_event_rule.lambda_every_5_minutes.arn
 }
 
-#initial configuration
-
-variable "s3_bucket_url" {
-  description = "The URL of the S3 bucket used by the Glue job"
-  default     = "s3://lambda-code-bucket-for-tests/"
-}
-
 #DynamoDB
 
 resource "aws_dynamodb_table" "opensky_data" {
@@ -193,7 +188,6 @@ resource "aws_iam_policy" "glue_s3_dynamodb_policy" {
   })
 }
 
-
 resource "aws_iam_role_policy_attachment" "glue_s3_dynamodb_attach" {
   role       = aws_iam_role.glue_job_role.name
   policy_arn = aws_iam_policy.glue_s3_dynamodb_policy.arn
@@ -218,7 +212,7 @@ resource "aws_cloudwatch_log_group" "glue_jobs" {
 
 #Glue job
 
-resource "aws_glue_job" "example_glue_job" {
+resource "aws_glue_job" "opensky-glue-job" {
   name     = "opensky-glue-job"
   role_arn = aws_iam_role.glue_job_role.arn
 

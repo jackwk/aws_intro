@@ -1,7 +1,7 @@
 aws glue start-job-run --job-name "opensky-glue-job"
 
-aws s3 rm s3://lambda-code-bucket-for-tests/jsons/2_1.json
+aws s3 rm s3://lambda-code-bucket-for-tests/jsons/2_2.json
 
-aws s3 cp ~/aws_intro/sample_jsons/2_2.json s3://lambda-code-bucket-for-tests/jsons/
+aws s3 cp ~/aws_intro/sample_jsons/2_3.json s3://lambda-code-bucket-for-tests/jsons/
 
 aws s3 cp ~/aws_intro/02_glue/glue-script.py s3://lambda-code-bucket-for-tests/
