@@ -1,0 +1,77 @@
+
+// S3 stuff
+
+S3 bucket: 
+Versioning disabled
+Encryption enabled
+
+CloudTrail data events: 
+s3-event-trail-glue-event-driven-workflow-tutorial
+
+S3 policy: 
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudtrail.amazonaws.com"
+            },
+            "Action": "s3:GetBucketAcl",
+            "Resource": "arn:aws:s3:::s3-eb-glue-test-bucket"
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudtrail.amazonaws.com"
+            },
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::s3-eb-glue-test-bucket/cloudtrail/*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control"
+                }
+            }
+        }
+    ]
+}
+
+// Cloudtrail stuff
+Trail location - S3
+
+Data events : S3
+All current and future S3 buckets	
+s3-eb-glue-test-bucket
+
+// Eventbridge Rule
+
+Event Pattern:
+{
+    "detail-type": ["AWS API Call via CloudTrail"],
+    "source": ["aws.s3"],
+    "detail": {
+      "eventSource": ["s3.amazonaws.com"],
+      "requestParameters": {
+        "bucketName": ["s3-eb-glue-test-bucket"],
+        "key": [{
+          "prefix": "data/products_raw/"
+        }]
+      },
+      "eventName": ["PutObject"]
+    }
+  }
+
+Target Glue workflow
+Role policy:
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Action": [
+				"glue:notifyEvent"
+			],
+			"Resource": "arn:aws:glue:eu-central-1:656122958899:workflow/s3trigger_data_conversion_workflow",
+			"Effect": "Allow"
+		}
+	]
+}
