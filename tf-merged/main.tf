@@ -16,7 +16,7 @@ variable "s3_json_bucket" {
 variable "s3_cloudtrail_bucket" {
   description = "The name of the S3 bucket for CloudTrail logs"
   type        = string
-  default     = "cloutrail-s3-logs-for-eb"
+  default     = "cloudtrail-s3-logs-for-eb"
 }
 
 variable "s3_code_bucket" {
