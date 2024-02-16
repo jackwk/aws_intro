@@ -1,11 +1,22 @@
+# Basic setup & variables
+# Terraform działa ale pewne wątpliwości czy cloudtrail na pewno
+
 provider "aws" {
   region = "eu-central-1"
 }
+
+data "aws_caller_identity" "current" {}
 
 variable "s3_json_bucket" {
   description = "The name of the S3 bucket for storing JSON files"
   type        = string
   default     = "opensky-flights-json-bucket"
+}
+
+variable "s3_cloudtrail_bucket" {
+  description = "The name of the S3 bucket for CloudTrail logs"
+  type        = string
+  default     = "cloutrail-s3-logs-for-eb"
 }
 
 variable "s3_code_bucket" {
@@ -25,9 +36,15 @@ variable "lambda_code_s3_key" {
   default     = "function.zip"
 }
 
-# S3 Bucket for JSON files
+# S3 Buckets & policies
 resource "aws_s3_bucket" "lambda_bucket" {
   bucket = var.s3_json_bucket
+  force_destroy = true
+}
+
+resource "aws_s3_bucket" "cloudtrail_logs_bucket" {
+  bucket = var.s3_cloudtrail_bucket
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "lambda_bucket_versioning" {
@@ -36,6 +53,57 @@ resource "aws_s3_bucket_versioning" "lambda_bucket_versioning" {
     status = "Enabled"
   }
 }
+
+resource "aws_s3_bucket_policy" "cloudtrail_logs_policy" {
+  bucket = aws_s3_bucket.cloudtrail_logs_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid       = "AWSCloudTrailAclCheck",
+        Effect    = "Allow",
+        Principal = {"Service": "cloudtrail.amazonaws.com"},
+        Action    = "s3:GetBucketAcl",
+        Resource  = "arn:aws:s3:::${var.s3_cloudtrail_bucket}"
+      },
+      {
+        Sid       = "AWSCloudTrailWrite",
+        Effect    = "Allow",
+        Principal = {"Service": "cloudtrail.amazonaws.com"},
+        Action    = "s3:PutObject",
+        Resource  = "arn:aws:s3:::${var.s3_cloudtrail_bucket}/AWSLogs/${data.aws_caller_identity.current.account_id}/*",
+        Condition = {
+          StringEquals = {"s3:x-amz-acl": "bucket-owner-full-control"}
+        }
+      }
+    ]
+  })
+}
+
+# Cloudtrail
+
+resource "aws_cloudtrail" "s3_json_bucket_trail" {
+  name                          = "s3_json_bucket_trail"
+  s3_bucket_name                = var.s3_cloudtrail_bucket
+  include_global_service_events = true
+
+  event_selector {
+    read_write_type           = "WriteOnly"
+    include_management_events = true
+
+    data_resource {
+      type   = "AWS::S3::Object"
+      values = ["arn:aws:s3:::${var.s3_json_bucket}/"]
+    }
+  }
+
+  depends_on = [
+    aws_s3_bucket_policy.cloudtrail_logs_policy
+  ]
+}
+
+
 
 # IAM Role for Lambda
 resource "aws_iam_role" "lambda_role" {
@@ -256,4 +324,18 @@ resource "aws_glue_job" "opensky-glue-job" {
 
   max_retries = 0
   timeout     = 60 
+}
+
+resource "aws_glue_workflow" "opensky_workflow" {
+  name = "opensky-workflow"
+}
+
+resource "aws_glue_trigger" "opensky_trigger" {
+  name          = "opensky-trigger"
+  workflow_name = aws_glue_workflow.opensky_workflow.name
+  type          = "ON_DEMAND"
+
+  actions {
+    job_name = aws_glue_job.opensky-glue-job.name
+  }
 }
