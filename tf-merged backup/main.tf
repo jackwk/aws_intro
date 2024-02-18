@@ -152,48 +152,6 @@ resource "aws_iam_role_policy" "lambda_policy" {
   })
 }
 
-# IAM Rule for EventBridge
-
-resource "aws_iam_role" "eventbridge_glue_role" {
-  name = "eventbridge_glue_role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "events.amazonaws.com"
-        }
-      },
-    ]
-  })
-}
-
-resource "aws_iam_policy" "eventbridge_glue_policy" {
-  name   = "eventbridge_glue_policy"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "glue:StartWorkflowRun",
-        ],
-        Resource = [
-          aws_glue_workflow.opensky_workflow.arn,
-        ]
-      },
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "eventbridge_glue_policy_attachment" {
-  role       = aws_iam_role.eventbridge_glue_role.name
-  policy_arn = aws_iam_policy.eventbridge_glue_policy.arn
-}
-
 # Lambda Function
 resource "aws_lambda_function" "opensky_lambda" {
   function_name = "OpenSkyLambda"
@@ -215,7 +173,7 @@ resource "aws_lambda_function" "opensky_lambda" {
   }
 }
 
-# CloudWatch Event Rule + EventBridge Lambda Rule
+# CloudWatch Event Rule + EventBridge
 resource "aws_cloudwatch_event_rule" "lambda_every_5_minutes" {
   name                = "every-5-minutes"
   description         = "Trigger every 5 minutes"
@@ -235,8 +193,6 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.lambda_every_5_minutes.arn
 }
-
-
 
 #DynamoDB
 
@@ -381,36 +337,5 @@ resource "aws_glue_trigger" "opensky_trigger" {
 
   actions {
     job_name = aws_glue_job.opensky-glue-job.name
-  }
-}
-
-# EventBridge for Glue
-
-resource "aws_cloudwatch_event_rule" "s3_write_event_rule" {
-  name        = "s3-write-event-rule"
-  description = "Trigger on S3 write events"
-
-  event_pattern = jsonencode({
-    "source": ["aws.s3"],
-    "detail-type": ["AWS API Call via CloudTrail"],
-    "detail": {
-      "eventName": ["PutObject", "PostObject"],
-      "requestParameters": {
-        "bucketName": [var.s3_json_bucket],
-      }
-    }
-  })
-}
-
-resource "aws_cloudwatch_event_target" "glue_workflow_target" {
-  rule      = aws_cloudwatch_event_rule.s3_write_event_rule.name
-  target_id = "TriggerGlueWorkflow"
-  arn       = aws_glue_workflow.opensky_workflow.arn
-
-  role_arn = aws_iam_role.eventbridge_glue_role.arn
-
-  input_transformer {
-    input_paths = {}
-    input_template = "\"{\\\"workflowName\\\":\\\"${aws_glue_workflow.opensky_workflow.name}\\\"}\""
   }
 }
