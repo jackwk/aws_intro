@@ -1,5 +1,4 @@
 # Basic setup & variables
-# Terraform działa ale pewne wątpliwości czy cloudtrail na pewno
 
 provider "aws" {
   region = "eu-central-1"
@@ -180,6 +179,7 @@ resource "aws_iam_policy" "eventbridge_glue_policy" {
         Effect = "Allow"
         Action = [
           "glue:StartWorkflowRun",
+          "glue:notifyEvent",
         ],
         Resource = [
           aws_glue_workflow.opensky_workflow.arn,
@@ -206,7 +206,7 @@ resource "aws_lambda_function" "opensky_lambda" {
   s3_bucket = var.s3_code_bucket
   s3_key    = var.lambda_code_s3_key
 
-  timeout = 15
+  timeout = 30
 
   environment {
     variables = {
@@ -377,7 +377,7 @@ resource "aws_glue_workflow" "opensky_workflow" {
 resource "aws_glue_trigger" "opensky_trigger" {
   name          = "opensky-trigger"
   workflow_name = aws_glue_workflow.opensky_workflow.name
-  type          = "ON_DEMAND"
+  type          = "EVENT"
 
   actions {
     job_name = aws_glue_job.opensky-glue-job.name
@@ -391,26 +391,21 @@ resource "aws_cloudwatch_event_rule" "s3_write_event_rule" {
   description = "Trigger on S3 write events"
 
   event_pattern = jsonencode({
-    "source": ["aws.s3"],
-    "detail-type": ["AWS API Call via CloudTrail"],
-    "detail": {
-      "eventName": ["PutObject", "PostObject"],
-      "requestParameters": {
-        "bucketName": [var.s3_json_bucket],
-      }
-    }
-  })
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "source": ["aws.s3"],
+  "detail": {
+    "eventSource": ["s3.amazonaws.com"],
+    "requestParameters": {
+      "bucketName": [var.s3_json_bucket]
+    },
+    "eventName": ["PutObject"]
+  }
+})
 }
 
 resource "aws_cloudwatch_event_target" "glue_workflow_target" {
   rule      = aws_cloudwatch_event_rule.s3_write_event_rule.name
   target_id = "TriggerGlueWorkflow"
   arn       = aws_glue_workflow.opensky_workflow.arn
-
-  role_arn = aws_iam_role.eventbridge_glue_role.arn
-
-  input_transformer {
-    input_paths = {}
-    input_template = "\"{\\\"workflowName\\\":\\\"${aws_glue_workflow.opensky_workflow.name}\\\"}\""
-  }
+  role_arn  = aws_iam_role.eventbridge_glue_role.arn
 }

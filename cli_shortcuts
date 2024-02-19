@@ -10,3 +10,18 @@ aws s3 cp ~/aws_intro/02_glue/glue-script.py s3://lambda-code-bucket-for-tests/
 aws s3 cp ~/aws_intro/sample_jsons/full.json s3://s3-bucket-for-eb-and-glue
 
 aws s3api delete-objects --bucket opensky-flights-json-bucket --delete "$(aws s3api list-object-versions --bucket opensky-flights-json-bucket --output=json --query='{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}')"
+
+# Delete multiple policies
+
+#!/bin/bash
+
+# List and filter policies
+policies_to_delete=$(aws iam list-policies --scope Local --query 'Policies[?starts_with(PolicyName, `Amazon_Event`)].{ARN:Arn}' --output text)
+
+# Loop through the ARNs and delete each policy
+for arn in $policies_to_delete; do
+    echo "Deleting policy $arn"
+    aws iam delete-policy --policy-arn $arn
+done
+
+echo "Deletion complete."

@@ -75,3 +75,28 @@ Role policy:
 		}
 	]
 }
+
+
+echo '{"product_id": "00001", "product_name": "Television", "created_at": "2021-06-01"}' > product_00001.json
+
+
+echo '{"product_id": "00002", "product_name": "USB charger", "created_at": "2021-06-02"}' > product_00002.json
+
+
+echo '{"product_id": "00003", "product_name": "USB charger", "created_at": "2021-06-03"}' > product_00003.json
+
+
+echo '{"product_id": "00004", "product_name": "USB charger", "created_at": "2021-06-04"}' > product_00004.json
+
+
+echo '{"product_id": "00005", "product_name": "USB charger", "created_at": "2021-06-05"}' > product_00005.json
+
+
+echo '{"product_id": "00006", "product_name": "USB charger", "created_at": "2021-06-05"}' > product_00006.json
+
+aws s3 cp product_00001.json s3://cloudformation-s3-bucket-glue/data/products_raw/
+aws s3 cp product_00002.json s3://cloudformation-s3-bucket-glue/data/products_raw/
+aws s3 cp product_00003.json s3://cloudformation-s3-bucket-glue/data/products_raw/
+aws s3 cp product_00004.json s3://cloudformation-s3-bucket-glue/data/products_raw/
+aws s3 cp product_00005.json s3://cloudformation-s3-bucket-glue/data/products_raw/
+aws s3 cp product_00006.json s3://cloudformation-s3-bucket-glue/data/products_raw/
