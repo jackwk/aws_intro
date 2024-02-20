@@ -24,6 +24,7 @@ variable "s3_code_bucket" {
   default     = "lambda-code-bucket-for-tests"
 }
 
+# Check if name can be replaced by variable
 variable "s3_bucket_url" {
   description = "The URL of the S3 bucket used by the Glue job"
   default     = "s3://lambda-code-bucket-for-tests/"
@@ -101,8 +102,6 @@ resource "aws_cloudtrail" "s3_json_bucket_trail" {
     aws_s3_bucket_policy.cloudtrail_logs_policy
   ]
 }
-
-
 
 # IAM Role for Lambda
 resource "aws_iam_role" "lambda_role" {
